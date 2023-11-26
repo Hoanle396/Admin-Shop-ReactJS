@@ -1,11 +1,12 @@
-import { DatabaseOutlined, OrderedListOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import { DatabaseOutlined, OrderedListOutlined, ShoppingCartOutlined, UserOutlined, DollarOutlined } from '@ant-design/icons';
 
 // icons
 const icons = {
   DatabaseOutlined,
   OrderedListOutlined,
   ShoppingCartOutlined,
-  UserOutlined
+  UserOutlined,
+  DollarOutlined
 };
 
 const pages = {
@@ -33,6 +34,13 @@ const pages = {
       type: 'item',
       url: '/orders',
       icon: icons.ShoppingCartOutlined
+    },
+    {
+      id: 'discountManager',
+      title: 'Discounts',
+      type: 'item',
+      url: '/discounts',
+      icon: icons.DollarOutlined
     },
     {
       id: 'usersManager',
