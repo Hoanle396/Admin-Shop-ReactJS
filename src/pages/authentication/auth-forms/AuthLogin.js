@@ -28,6 +28,8 @@ import AnimateButton from 'components/@extended/AnimateButton';
 
 // assets
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { useMutation } from 'react-query';
+import { login } from 'apis/auth';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -35,6 +37,8 @@ const AuthLogin = () => {
   const [checked, setChecked] = React.useState(false);
 
   const [showPassword, setShowPassword] = React.useState(false);
+  const { mutate, isLoading } = useMutation(login, { onSuccess: () => {}, onError: () => {} });
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -43,30 +47,24 @@ const AuthLogin = () => {
     event.preventDefault();
   };
 
+  const handleSubmit = (values) => {
+    mutate(values);
+  };
+
   return (
     <>
       <Formik
         initialValues={{
-          email: 'info@codedthemes.com',
-          password: '123456',
-          submit: null
+          email: 'user@example.com',
+          password: 'string'
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
-        onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          try {
-            setStatus({ success: false });
-            setSubmitting(false);
-          } catch (err) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
-        }}
+        onSubmit={handleSubmit}
       >
-        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+        {({ errors, handleBlur, handleChange, handleSubmit, touched, values }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -144,14 +142,9 @@ const AuthLogin = () => {
                   </Link>
                 </Stack>
               </Grid>
-              {errors.submit && (
-                <Grid item xs={12}>
-                  <FormHelperText error>{errors.submit}</FormHelperText>
-                </Grid>
-              )}
               <Grid item xs={12}>
                 <AnimateButton>
-                  <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
+                  <Button disableElevation disabled={isLoading} fullWidth size="large" type="submit" variant="contained" color="primary">
                     Login
                   </Button>
                 </AnimateButton>
