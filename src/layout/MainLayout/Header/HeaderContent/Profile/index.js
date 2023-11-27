@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import {
   Avatar,
   Box,
@@ -18,16 +17,20 @@ import {
   Tabs,
   Typography
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 // project import
-import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
+import MainCard from 'components/MainCard';
 import ProfileTab from './ProfileTab';
 import SettingTab from './SettingTab';
 
 // assets
-import avatar1 from 'assets/images/users/avatar-1.png';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import avatar1 from 'assets/images/users/avatar-1.png';
+import { useDispatch, useSelector } from 'react-redux';
+import { Navigate, useNavigate } from 'react-router';
+import { logout } from 'store/reducers/auth';
 
 // tab panel wrapper
 function TabPanel({ children, value, index, ...other }) {
@@ -55,9 +58,15 @@ function a11yProps(index) {
 
 const Profile = () => {
   const theme = useTheme();
+  const { isLogin, user, loading } = useSelector((state) => state.auth);
+
+  const push = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
-    // logout
+    dispatch(logout());
+    localStorage.removeItem('token');
+    push('/login');
   };
 
   const anchorRef = useRef(null);
@@ -81,6 +90,10 @@ const Profile = () => {
 
   const iconBackColorOpen = 'grey.300';
 
+  if (!isLogin && !loading) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
       <ButtonBase
@@ -98,7 +111,7 @@ const Profile = () => {
       >
         <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
-          <Typography variant="subtitle1">John Doe</Typography>
+          <Typography variant="subtitle1">{user?.fullName ?? ''}</Typography>
         </Stack>
       </ButtonBase>
       <Popper
@@ -141,9 +154,9 @@ const Profile = () => {
                           <Stack direction="row" spacing={1.25} alignItems="center">
                             <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                             <Stack>
-                              <Typography variant="h6">John Doe</Typography>
+                              <Typography variant="h6">{user?.fullName ?? ''}</Typography>
                               <Typography variant="body2" color="textSecondary">
-                                UI/UX Designer
+                                {user?.email ?? ''}
                               </Typography>
                             </Stack>
                           </Stack>

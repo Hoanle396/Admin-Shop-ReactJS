@@ -1,14 +1,12 @@
 import { Box, Button, Grid } from '@mui/material';
 import MainCard from 'components/MainCard';
 
-import Discounts from './discounts';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from 'apis/auth';
+import Discounts from './discounts';
 
 export default function DiscountsPage() {
   const push = useNavigate();
-  const { user } = useUser();
-  console.log({ user });
+
   return (
     <Box>
       <Grid container alignItems="center" justifyContent="space-between">

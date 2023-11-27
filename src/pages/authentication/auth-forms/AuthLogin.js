@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 // material-ui
 import {
@@ -30,6 +30,9 @@ import AnimateButton from 'components/@extended/AnimateButton';
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { useMutation } from 'react-query';
 import { login } from 'apis/auth';
+import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { getMe, logout, setIsLogin, setUser, setUserLoading } from 'store/reducers/auth';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -37,7 +40,24 @@ const AuthLogin = () => {
   const [checked, setChecked] = React.useState(false);
 
   const [showPassword, setShowPassword] = React.useState(false);
-  const { mutate, isLoading } = useMutation(login, { onSuccess: () => {}, onError: () => {} });
+  const dispatch = useDispatch();
+  const push = useNavigate();
+  const { mutate, isLoading } = useMutation(login, {
+    onSuccess: (data) => {
+      toast.success('You are now logged in successfully');
+      dispatch(setUser(data));
+      dispatch(setIsLogin(!!data && data.role === 1));
+      dispatch(setUserLoading(false));
+      localStorage.setItem('token', data.token ?? '');
+      dispatch(getMe());
+      push('/dashboard');
+    },
+    onError: () => {
+      toast.error('Email or password incorrect');
+      dispatch(logout());
+      localStorage.removeItem('token');
+    }
+  });
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
