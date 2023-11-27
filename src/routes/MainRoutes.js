@@ -10,6 +10,7 @@ import ProductsPage from 'pages/products/index';
 import OrdersPage from 'pages/orders/index';
 import UsersPage from 'pages/users/index';
 import DiscountsPage from 'pages/discounts/index';
+import CreateDiscounts from 'pages/discounts/create';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -70,7 +71,7 @@ const MainRoutes = {
         },
         {
           path: 'new',
-          element: <Create />
+          element: <CreateDiscounts />
         }
       ]
     },

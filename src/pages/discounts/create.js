@@ -1,103 +1,86 @@
-import { Box, Button, FormHelperText, Grid, InputLabel, OutlinedInput, Stack, InputAdornment, MenuItem, TextField } from '@mui/material';
+import { DollarOutlined } from '@ant-design/icons';
+import { Box, Button, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, OutlinedInput, Stack, TextField } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers';
 import AnimateButton from 'components/@extended/AnimateButton';
 import MainCard from 'components/MainCard';
-import { DollarOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 // third party
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
-const defaultValue = {
-  sizeName: '',
-  quantity: 0
-};
 
-const Create = () => {
-  const [sizes, setSizes] = useState([defaultValue]);
-  const [images, setImages] = useState([]);
-  const [imageURLS, setImageURLs] = useState([]);
-  useEffect(() => {
-    if (images.length < 1) return;
-    setImageURLs(images.map((image) => URL.createObjectURL(image)));
-  }, [images]);
-
-  function onImageChange(e) {
-    setImages([...e.target.files]);
-  }
-
-  const addSizes = async () => {
-    setSizes([...sizes, defaultValue]);
-  };
-
+const CreateDiscounts = () => {
   return (
     <Box>
       <MainCard sx={{ mt: 2, p: 4 }} content>
         <Formik
           initialValues={{
-            name: '',
-            category: '',
-            sizes: [defaultValue],
-            images: '',
-            price: 0,
-            description: ''
+            code: '',
+            description: '',
+            type: 0,
+            value: '',
+            endDate: ''
           }}
           validationSchema={Yup.object().shape({
-            name: Yup.string().max(255).required('Name is required'),
-            category: Yup.string().required('Category is required'),
-            price: Yup.number().min(1).required('Price is required'),
-            description: Yup.string().max(1000).required('Description is required'),
-            sizes: Yup.array()
-              .of(
-                Yup.object().shape({
-                  sizeName: Yup.string().required().label('Size Name'),
-                  quantity: Yup.number().min(1).required().label('Quantity')
-                })
-              )
+            code: Yup.string()
+              .max(255)
+              .required()
+              .label('Code')
+              .transform((value) => (value !== null ? value.toUpperCase() : value)),
+            description: Yup.string().max(1000).required('Description'),
+            type: Yup.number().oneOf([0, 1]),
+            value: Yup.number()
               .min(1)
-              .required(),
-            images: Yup.string().required()
+              .required()
+              .label('Value')
+              .when('type', (type, field) => (type == 1 ? field.max(100) : field)),
+            endDate: Yup.mixed().required().label('End Date')
           })}
           onSubmit={async (values) => {
             console.log({ ...values });
           }}
         >
-          {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+          {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setFieldValue }) => (
             <form noValidate onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <InputLabel>Products Name*</InputLabel>
+                    <InputLabel>Code*</InputLabel>
                     <OutlinedInput
                       type="name"
-                      value={values.name}
-                      name="name"
+                      value={values.code}
+                      name="code"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      placeholder="John"
+                      placeholder="Code"
                       fullWidth
-                      error={Boolean(touched.name && errors.name)}
+                      error={Boolean(touched.code && errors.code)}
                     />
-                    {touched.name && errors.name && <FormHelperText error>{errors.name}</FormHelperText>}
+                    {touched.code && errors.code && <FormHelperText error>{errors.code}</FormHelperText>}
                   </Stack>
                 </Grid>
 
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <InputLabel>Category</InputLabel>
+                    <InputLabel>Type</InputLabel>
                     <TextField
                       select
                       fullWidth
-                      error={Boolean(touched.category && errors.category)}
-                      value={values.category}
-                      name="category"
+                      error={Boolean(touched.type && errors.type)}
+                      value={values.type}
+                      name="type"
+                      placeholder="Type"
                       onChange={handleChange}
                     >
-                      {['ACTIVE', 'INACTIVE'].map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
+                      {[
+                        { value: 1, label: 'PERCENT' },
+                        { value: 0, label: 'VALUE' }
+                      ].map(({ value, label }) => (
+                        <MenuItem key={value} value={value}>
+                          {label}
                         </MenuItem>
                       ))}
                     </TextField>
-                    {touched.category && errors.category && <FormHelperText error>{errors.category}</FormHelperText>}
+                    {touched.type && errors.type && <FormHelperText error>{errors.type}</FormHelperText>}
                   </Stack>
                 </Grid>
                 <Grid item xs={12}>
@@ -110,7 +93,7 @@ const Create = () => {
                       name="description"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      placeholder="Demo Inc."
+                      placeholder="Description"
                       inputProps={{}}
                       multiline
                       rows={5}
@@ -120,15 +103,15 @@ const Create = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <InputLabel>Price</InputLabel>
+                    <InputLabel>Value</InputLabel>
                     <OutlinedInput
                       fullWidth
-                      error={Boolean(touched.price && errors.price)}
-                      value={values.price}
-                      name="price"
+                      error={Boolean(touched.value && errors.value)}
+                      value={values.value}
+                      name="value"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      placeholder="Demo Inc."
+                      placeholder="Value"
                       inputProps={{}}
                       startAdornment={
                         <InputAdornment position="start">
@@ -136,101 +119,28 @@ const Create = () => {
                         </InputAdornment>
                       }
                     />
-                    {touched.price && errors.price && <FormHelperText error>{errors.price}</FormHelperText>}
+                    {touched.value && errors.value && <FormHelperText error>{errors.value}</FormHelperText>}
                   </Stack>
                 </Grid>
-                <Grid item container xs={12} md={6}>
-                  {sizes.map((_, index) => {
-                    const fieldName = `sizes[${index}]`;
-
-                    return (
-                      <>
-                        <Grid item xs={6} px={0.5}>
-                          <Stack spacing={1}>
-                            <InputLabel>Size Name</InputLabel>
-                            <OutlinedInput
-                              fullWidth
-                              error={Boolean(
-                                Array.isArray(touched.sizes) &&
-                                  touched.sizes[index]?.sizeName &&
-                                  Array.isArray(errors.sizes) &&
-                                  errors.sizes[index]?.sizeName
-                              )}
-                              value={values?.sizes?.length > 0 ? values.sizes[index]?.sizeName : ''}
-                              name={`${fieldName}.sizeName`}
-                              onBlur={handleBlur}
-                              onChange={handleChange}
-                              placeholder="Demo Inc."
-                              inputProps={{}}
-                            />
-                            {Array.isArray(touched.sizes) &&
-                              touched.sizes[index]?.sizeName &&
-                              Array.isArray(errors.sizes) &&
-                              errors.sizes[index]?.sizeName && <FormHelperText error>{errors.sizes[index].sizeName}</FormHelperText>}
-                          </Stack>
-                        </Grid>
-                        <Grid item xs={6} px={0.5}>
-                          <Stack spacing={1}>
-                            <InputLabel>Quantity</InputLabel>
-                            <OutlinedInput
-                              fullWidth
-                              error={Boolean(
-                                Array.isArray(touched.sizes) &&
-                                  touched.sizes[index]?.quantity &&
-                                  Array.isArray(errors.sizes) &&
-                                  errors.sizes[index]?.quantity
-                              )}
-                              value={values?.sizes?.length > 0 ? values.sizes[index]?.quantity : ''}
-                              name={`${fieldName}.quantity`}
-                              onBlur={handleBlur}
-                              onChange={handleChange}
-                              placeholder="Demo Inc."
-                              inputProps={{}}
-                            />
-                            {Array.isArray(touched.sizes) &&
-                              touched.sizes[index]?.quantity &&
-                              Array.isArray(errors.sizes) &&
-                              errors.sizes[index]?.quantity && <FormHelperText error>{errors.sizes[index]?.quantity}</FormHelperText>}
-                          </Stack>
-                        </Grid>
-                      </>
-                    );
-                  })}
-                  <Grid item xs={10}>
-                    {touched.sizes && typeof errors.sizes === 'string' && errors.sizes && (
-                      <FormHelperText error>{errors.sizes}</FormHelperText>
-                    )}
-                  </Grid>
-                  <Grid item xs={2} pt={1}>
-                    <Button variant="contained" fullWidth onClick={addSizes}>
-                      <PlusCircleOutlined />
-                    </Button>
-                  </Grid>
-                </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={6}>
                   <Stack spacing={1}>
-                    <InputLabel>Images</InputLabel>
-                    <OutlinedInput
-                      fullWidth
-                      error={Boolean(touched.images && errors.images)}
-                      value={values.images}
-                      name="images"
-                      onBlur={handleBlur}
-                      onChange={(e) => {
-                        handleChange(e);
-                        onImageChange(e);
-                      }}
-                      type="file"
-                      inputProps={{
-                        multiple: true
-                      }}
+                    <InputLabel>End Date</InputLabel>
+                    <DateTimePicker
+                      disablePast
+                      onChange={(e) => setFieldValue('endDate', e)}
+                      placeholder="End Date"
+                      textField={(props) => (
+                        <OutlinedInput
+                          {...props}
+                          error={Boolean(touched.endDate && errors.endDate)}
+                          name="endDate"
+                          onBlur={handleBlur}
+                          fullWidth
+                        />
+                      )}
+                      minDateTime={dayjs()}
                     />
-                    <Stack flexDirection="row" gap={1}>
-                      {imageURLS.map((imageSrc) => (
-                        <img key={imageSrc} src={imageSrc} alt="not fount" width={'250px'} />
-                      ))}
-                    </Stack>
-                    {touched.images && errors.images && <FormHelperText error>{errors.images}</FormHelperText>}
+                    {touched.endDate && errors.endDate && <FormHelperText error>{errors.endDate}</FormHelperText>}
                   </Stack>
                 </Grid>
                 <Grid item xs={12}>
@@ -257,4 +167,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default CreateDiscounts;
