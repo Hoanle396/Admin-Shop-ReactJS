@@ -25,6 +25,7 @@ const Delete = (props, ref) => {
   };
 
   const onDelete = () => {
+    onClose();
     handleDelete && handleDelete(info);
   };
 

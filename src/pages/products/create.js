@@ -5,7 +5,12 @@ import { DollarOutlined, PlusCircleOutlined } from '@ant-design/icons';
 // third party
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation } from 'react-query';
+import { createProduct } from 'apis/products';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
+import { useCategory } from 'apis/category';
 const defaultValue = {
   sizeName: '',
   quantity: 0
@@ -15,6 +20,31 @@ const Create = () => {
   const [sizes, setSizes] = useState([defaultValue]);
   const [images, setImages] = useState([]);
   const [imageURLS, setImageURLs] = useState([]);
+
+  const [rows, setRows] = useState([]);
+  useCategory({
+    onSuccess: (data) => {
+      setRows(data);
+    },
+    onError: () => {
+      setRows([]);
+    }
+  });
+
+  const option = useMemo(() => rows?.map((row) => ({ value: row.id, label: row.name })), [rows]);
+
+  const push = useNavigate();
+
+  const { mutate, isLoading } = useMutation(createProduct, {
+    onSuccess: () => {
+      toast.success('Product created successfully');
+      push('/products');
+    },
+    onError: () => {
+      toast.success('Product created failed');
+    }
+  });
+
   useEffect(() => {
     if (images.length < 1) return;
     setImageURLs(images.map((image) => URL.createObjectURL(image)));
@@ -26,6 +56,21 @@ const Create = () => {
 
   const addSizes = async () => {
     setSizes([...sizes, defaultValue]);
+  };
+
+  const handleSubmit = ({ name, description, price, sizes, category }) => {
+    const form = new FormData();
+    form.append('name', name);
+    form.append('description', description);
+    form.append('price', price);
+    form.append('category', category);
+    sizes.forEach((size) => {
+      form.append('sizes', JSON.stringify(size));
+    });
+    images.forEach((file) => {
+      form.append('images', file);
+    });
+    mutate(form);
   };
 
   return (
@@ -56,11 +101,9 @@ const Create = () => {
               .required(),
             images: Yup.string().required()
           })}
-          onSubmit={async (values) => {
-            console.log({ ...values });
-          }}
+          onSubmit={handleSubmit}
         >
-          {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+          {({ errors, handleBlur, handleChange, handleSubmit, touched, values }) => (
             <form noValidate onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -91,9 +134,9 @@ const Create = () => {
                       name="category"
                       onChange={handleChange}
                     >
-                      {['ACTIVE', 'INACTIVE'].map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
+                      {option.map(({ value, label }) => (
+                        <MenuItem key={value} value={value}>
+                          {label}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -235,15 +278,7 @@ const Create = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <AnimateButton>
-                    <Button
-                      disableElevation
-                      disabled={isSubmitting}
-                      fullWidth
-                      size="large"
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                    >
+                    <Button disableElevation disabled={isLoading} fullWidth size="large" type="submit" variant="contained" color="primary">
                       Create
                     </Button>
                   </AnimateButton>
