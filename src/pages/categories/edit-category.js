@@ -1,24 +1,47 @@
 import { Box, Button, FormHelperText, Grid, InputLabel, OutlinedInput, Stack } from '@mui/material';
+import { useCategoryById } from 'apis/category/queries';
+import { updateCategory } from 'apis/category/request';
 import AnimateButton from 'components/@extended/AnimateButton';
+import Loader from 'components/Loader';
 import MainCard from 'components/MainCard';
 // third party
 import { Formik } from 'formik';
+import toast from 'react-hot-toast';
+import { useMutation } from 'react-query';
+import { useNavigate, useParams } from 'react-router';
 import * as Yup from 'yup';
 const EditCategory = () => {
+  const { id } = useParams();
+  const { data, isLoading } = useCategoryById(id);
+
+  const push = useNavigate();
+
+  const { mutate } = useMutation(updateCategory, {
+    onSuccess: () => {
+      toast.success('Category updated successfully');
+      push('/categories');
+    },
+    onError: () => {
+      toast.error('Category updated failed');
+    }
+  });
+
+  if (isLoading) return <Loader />;
+
   return (
     <Box>
       <MainCard sx={{ mt: 2, p: 4 }} content>
         <Formik
           initialValues={{
-            name: '',
-            description: ''
+            name: data?.name ?? '',
+            description: data?.description ?? ''
           }}
           validationSchema={Yup.object().shape({
             name: Yup.string().max(255).required('Name is required'),
             description: Yup.string().max(1000).required('Description is required')
           })}
           onSubmit={async (values) => {
-            console.log({ ...values });
+            mutate({ id, payload: values });
           }}
         >
           {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (

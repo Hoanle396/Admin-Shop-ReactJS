@@ -11,6 +11,7 @@ import OrdersPage from 'pages/orders/index';
 import UsersPage from 'pages/users/index';
 import DiscountsPage from 'pages/discounts/index';
 import CreateDiscounts from 'pages/discounts/create';
+import EditCategory from 'pages/categories/edit-category';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -37,6 +38,10 @@ const MainRoutes = {
         {
           path: 'new',
           element: <CreateCategory />
+        },
+        {
+          path: ':id',
+          element: <EditCategory />
         }
       ]
     },

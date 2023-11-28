@@ -25,6 +25,7 @@ const DeleteCategory = (props, ref) => {
   };
 
   const onDelete = () => {
+    onClose();
     handleDelete && handleDelete(info);
   };
 

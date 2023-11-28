@@ -1,10 +1,27 @@
 import { Box, Button, FormHelperText, Grid, InputLabel, OutlinedInput, Stack } from '@mui/material';
+import { createCategory } from 'apis/category/request';
 import AnimateButton from 'components/@extended/AnimateButton';
 import MainCard from 'components/MainCard';
 // third party
 import { Formik } from 'formik';
+import toast from 'react-hot-toast';
+import { useMutation } from 'react-query';
+import { useNavigate } from 'react-router';
 import * as Yup from 'yup';
+
 const CreateCategory = () => {
+  const push = useNavigate();
+
+  const { mutate } = useMutation(createCategory, {
+    onSuccess: () => {
+      toast.success('Category created successfully');
+      push('/categories');
+    },
+    onError: () => {
+      toast.error('Category created failed');
+    }
+  });
+
   return (
     <Box>
       <MainCard sx={{ mt: 2, p: 4 }} content>
@@ -18,7 +35,7 @@ const CreateCategory = () => {
             description: Yup.string().max(1000).required('Description is required')
           })}
           onSubmit={async (values) => {
-            console.log({ ...values });
+            mutate(values);
           }}
         >
           {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
