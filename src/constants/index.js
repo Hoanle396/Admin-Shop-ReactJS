@@ -4,5 +4,5 @@ export const ORDER_STATUS = {
   PENDING: 0,
   CLOSED: 1,
   SUCCESS: 2,
-  CONFIRM: 3,
+  CONFIRM: 3
 };

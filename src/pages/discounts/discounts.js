@@ -123,7 +123,7 @@ const Status = ({ endDate }) => {
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
-      <Chip size='small' color={isEnd ? 'error' : 'success'} label={isEnd ? 'EXPIRE' : 'WORKING'} />
+      <Chip size="small" color={isEnd ? 'error' : 'success'} label={isEnd ? 'EXPIRE' : 'WORKING'} />
     </Stack>
   );
 };

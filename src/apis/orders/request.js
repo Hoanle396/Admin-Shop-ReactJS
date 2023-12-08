@@ -1,6 +1,5 @@
 import request from '../axios';
 
-
 export const getOrders = async () => {
   const { data } = await request({
     url: '/order',
@@ -21,7 +20,7 @@ export const updateOrderStatus = async (payload) => {
   const { data } = await request({
     url: `/order/${payload.id}`,
     method: 'POST',
-    data:payload
+    data: payload
   });
   return data;
 };

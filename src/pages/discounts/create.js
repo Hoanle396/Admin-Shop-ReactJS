@@ -13,10 +13,9 @@ import { useNavigate } from 'react-router';
 import * as Yup from 'yup';
 
 const CreateDiscounts = () => {
-
   const push = useNavigate();
 
-  const { mutate,isLoading } = useMutation(createDiscount, {
+  const { mutate, isLoading } = useMutation(createDiscount, {
     onSuccess: () => {
       toast.success('Discount created successfully');
       push('/discounts');
@@ -54,7 +53,7 @@ const CreateDiscounts = () => {
           })}
           onSubmit={(values) => mutate(values)}
         >
-          {({ errors, handleBlur, handleChange, handleSubmit,  touched, values, setFieldValue }) => (
+          {({ errors, handleBlur, handleChange, handleSubmit, touched, values, setFieldValue }) => (
             <form noValidate onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -160,15 +159,7 @@ const CreateDiscounts = () => {
                 </Grid>
                 <Grid item xs={12}>
                   <AnimateButton>
-                    <Button
-                      disableElevation
-                      disabled={isLoading}
-                      fullWidth
-                      size="large"
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                    >
+                    <Button disableElevation disabled={isLoading} fullWidth size="large" type="submit" variant="contained" color="primary">
                       Create
                     </Button>
                   </AnimateButton>
