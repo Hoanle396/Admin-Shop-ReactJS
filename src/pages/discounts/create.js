@@ -1,14 +1,31 @@
 import { DollarOutlined } from '@ant-design/icons';
 import { Box, Button, FormHelperText, Grid, InputAdornment, InputLabel, MenuItem, OutlinedInput, Stack, TextField } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
+import { createDiscount } from 'apis/discount';
 import AnimateButton from 'components/@extended/AnimateButton';
 import MainCard from 'components/MainCard';
 import dayjs from 'dayjs';
 // third party
 import { Formik } from 'formik';
+import toast from 'react-hot-toast';
+import { useMutation } from 'react-query';
+import { useNavigate } from 'react-router';
 import * as Yup from 'yup';
 
 const CreateDiscounts = () => {
+
+  const push = useNavigate();
+
+  const { mutate,isLoading } = useMutation(createDiscount, {
+    onSuccess: () => {
+      toast.success('Discount created successfully');
+      push('/discounts');
+    },
+    onError: () => {
+      toast.error('Discount created failed');
+    }
+  });
+
   return (
     <Box>
       <MainCard sx={{ mt: 2, p: 4 }} content>
@@ -35,11 +52,9 @@ const CreateDiscounts = () => {
               .when('type', (type, field) => (type == 1 ? field.max(100) : field)),
             endDate: Yup.mixed().required().label('End Date')
           })}
-          onSubmit={async (values) => {
-            console.log({ ...values });
-          }}
+          onSubmit={(values) => mutate(values)}
         >
-          {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setFieldValue }) => (
+          {({ errors, handleBlur, handleChange, handleSubmit,  touched, values, setFieldValue }) => (
             <form noValidate onSubmit={handleSubmit}>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -147,7 +162,7 @@ const CreateDiscounts = () => {
                   <AnimateButton>
                     <Button
                       disableElevation
-                      disabled={isSubmitting}
+                      disabled={isLoading}
                       fullWidth
                       size="large"
                       type="submit"

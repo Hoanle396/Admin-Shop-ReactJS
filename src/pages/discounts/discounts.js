@@ -1,62 +1,69 @@
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Box, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton } from '@mui/material';
+import {
+  Box,
+  Link,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  IconButton,
+  Chip
+} from '@mui/material';
 
 import NumberFormat from 'react-number-format';
 
 import Dot from 'components/@extended/Dot';
 import DeleteCategory from './delete';
-import { useRef } from 'react';
-
-function createData(trackingNo, name, fat, carbs, protein) {
-  return { trackingNo, name, fat, carbs, protein };
-}
-
-const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239),
-  createData(13286564, 'Computer Accessories', 100, 1, 83348),
-  createData(86739658, 'TV', 99, 0, 410780),
-  createData(13256498, 'Keyboard', 125, 2, 70999),
-  createData(98753263, 'Mouse', 89, 2, 10570),
-  createData(98753275, 'Desktop', 185, 1, 98063),
-  createData(98753291, 'Chair', 100, 0, 14001)
-];
+import { useMemo, useRef, useState } from 'react';
+import { deleteDiscount, useDiscount } from 'apis/discount';
+import dayjs from 'dayjs';
+import toast from 'react-hot-toast';
+import { useMutation } from 'react-query';
 
 const headCells = [
   {
     id: 'trackingNo',
     align: 'left',
     disablePadding: false,
-    label: 'Tracking No.'
+    label: 'No.'
   },
   {
     id: 'name',
     align: 'left',
     disablePadding: true,
-    label: 'Product Name'
+    label: 'Coupon Code'
   },
-  {
-    id: 'fat',
-    align: 'right',
-    disablePadding: false,
-    label: 'Total Order'
-  },
+
   {
     id: 'carbs',
     align: 'left',
     disablePadding: false,
 
-    label: 'Status'
+    label: 'Type'
   },
   {
     id: 'protein',
     align: 'left',
     disablePadding: false,
-    label: 'Total Amount'
+    label: 'Coupon'
+  },
+  {
+    id: 'fat',
+    align: 'left',
+    disablePadding: false,
+    label: 'End Date'
+  },
+  {
+    id: 'status',
+    align: 'left',
+    disablePadding: false,
+    label: 'Status'
   },
   {
     id: 'actions',
@@ -80,26 +87,23 @@ function HeaderTable() {
   );
 }
 
-const Status = ({ status }) => {
+const Type = ({ type }) => {
   let color;
   let title;
 
-  switch (status) {
+  switch (type) {
     case 0:
-      color = 'warning';
-      title = 'Pending';
+      color = 'secondary';
+      title = 'VALUE';
       break;
     case 1:
-      color = 'success';
-      title = 'Approved';
+      color = 'primary';
+      title = 'PERCENT';
       break;
-    case 2:
-      color = 'error';
-      title = 'Rejected';
-      break;
+
     default:
       color = 'primary';
-      title = 'None';
+      title = 'UNKNOW';
   }
 
   return (
@@ -110,20 +114,54 @@ const Status = ({ status }) => {
   );
 };
 
-Status.propTypes = {
-  status: PropTypes.number
+Type.propTypes = {
+  type: PropTypes.number
 };
 
+const Status = ({ endDate }) => {
+  const isEnd = useMemo(() => dayjs().isAfter(dayjs(endDate)), [endDate]);
+
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Chip size='small' color={isEnd ? 'error' : 'success'} label={isEnd ? 'EXPIRE' : 'WORKING'} />
+    </Stack>
+  );
+};
+
+Status.propTypes = {
+  endDate: PropTypes.string
+};
 // ==============================|| ORDER TABLE ||============================== //
 
 export default function Discounts() {
   const refModalDelete = useRef(null);
+  const [rows, setRows] = useState();
+
+  const { refetch } = useDiscount({
+    onSuccess: (data) => {
+      setRows(data);
+    },
+    onError: () => {
+      setRows([]);
+    }
+  });
+
+  const { mutate } = useMutation(deleteDiscount, {
+    onSuccess: () => {
+      toast.success('Coupon deleted successfully');
+      refetch();
+    },
+    onError: () => {
+      toast.error('Coupon deleted failed');
+    }
+  });
+
   const handleRemove = (item) => {
     refModalDelete.current?.onOpen(item);
   };
 
   const handleDelete = (item) => {
-    console.log({ ...item });
+    mutate(item.id);
   };
 
   return (
@@ -151,31 +189,28 @@ export default function Discounts() {
         >
           <HeaderTable />
           <TableBody>
-            {rows.map((row) => {
+            {rows?.map((row) => {
               return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  tabIndex={-1}
-                  key={row.trackingNo}
-                >
+                <TableRow hover role="checkbox" sx={{ '&:last-child td, &:last-child th': { border: 0 } }} tabIndex={-1} key={row.id}>
                   <TableCell component="th" scope="row" align="left">
                     <Link color="secondary" component={RouterLink} to="">
-                      {row.trackingNo}
+                      {row.id}
                     </Link>
                   </TableCell>
-                  <TableCell align="left">{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
+                  <TableCell align="left">{row.code}</TableCell>
                   <TableCell align="left">
-                    <Status status={row.carbs} />
+                    <Type type={row.type} />
                   </TableCell>
                   <TableCell align="left">
-                    <NumberFormat value={row.protein} displayType="text" thousandSeparator prefix="$" />
+                    <NumberFormat value={row.value} displayType="text" thousandSeparator prefix={row.type == 0 ? '$ ' : '% '} />
                   </TableCell>
+                  <TableCell align="left">
+                    <Status endDate={row.endDate} />
+                  </TableCell>
+                  <TableCell align="left">{dayjs(row.endDate).format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell align="right">
-                    <IconButton>
-                      <DeleteOutlined onClick={() => handleRemove(row)} />
+                    <IconButton onClick={() => handleRemove(row)}>
+                      <DeleteOutlined />
                     </IconButton>
                   </TableCell>
                 </TableRow>

@@ -6,23 +6,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import NumberFormat from 'react-number-format';
 
 import Dot from 'components/@extended/Dot';
+import { useState } from 'react';
 
-function createData(trackingNo, name, fat, carbs, protein) {
-  return { trackingNo, name, fat, carbs, protein };
-}
-
-const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239),
-  createData(13286564, 'Computer Accessories', 100, 1, 83348),
-  createData(86739658, 'TV', 99, 0, 410780),
-  createData(13256498, 'Keyboard', 125, 2, 70999),
-  createData(98753263, 'Mouse', 89, 2, 10570),
-  createData(98753275, 'Desktop', 185, 1, 98063),
-  createData(98753291, 'Chair', 100, 0, 14001)
-];
+import { useOrders } from 'apis/orders';
+import dayjs from 'dayjs';
 
 const headCells = [
   {
@@ -35,26 +22,25 @@ const headCells = [
     id: 'name',
     align: 'left',
     disablePadding: true,
-    label: 'Product Name'
+    label: 'Order Code'
   },
   {
     id: 'fat',
-    align: 'right',
+    align: 'left',
     disablePadding: false,
-    label: 'Total Order'
+    label: 'Total Amount'
   },
   {
     id: 'carbs',
     align: 'left',
     disablePadding: false,
-
     label: 'Status'
   },
   {
     id: 'protein',
     align: 'left',
     disablePadding: false,
-    label: 'Total Amount'
+    label: 'Created At'
   },
   {
     id: 'actions',
@@ -87,17 +73,21 @@ const Status = ({ status }) => {
       color = 'warning';
       title = 'Pending';
       break;
-    case 1:
-      color = 'success';
-      title = 'Approved';
-      break;
     case 2:
+      color = 'success';
+      title = 'Success';
+      break;
+    case 1:
       color = 'error';
-      title = 'Rejected';
+      title = 'Closed';
+      break;
+    case 3:
+      color = 'primary';
+      title = 'Confirm';
       break;
     default:
-      color = 'primary';
-      title = 'None';
+      color = 'warning';
+      title = 'Pending';
   }
 
   return (
@@ -115,6 +105,17 @@ Status.propTypes = {
 // ==============================|| ORDER TABLE ||============================== //
 
 export default function Orders() {
+  const [rows, setRows] = useState();
+
+  useOrders({
+    onSuccess: (data) => {
+      setRows(data);
+    },
+    onError: () => {
+      setRows([]);
+    }
+  });
+
   return (
     <Box>
       <TableContainer
@@ -140,28 +141,22 @@ export default function Orders() {
         >
           <HeaderTable />
           <TableBody>
-            {rows.map((row) => {
+            {rows?.map((row) => {
               return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  tabIndex={-1}
-                  key={row.trackingNo}
-                >
+                <TableRow hover role="checkbox" sx={{ '&:last-child td, &:last-child th': { border: 0 } }} tabIndex={-1} key={row.id}>
                   <TableCell component="th" scope="row" align="left">
                     <Link color="secondary" component={RouterLink} to="">
-                      {row.trackingNo}
+                      {row.id}
                     </Link>
                   </TableCell>
-                  <TableCell align="left">{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
+                  <TableCell align="left">{row.code}</TableCell>
                   <TableCell align="left">
-                    <Status status={row.carbs} />
+                    <NumberFormat value={row.amount} displayType="text" thousandSeparator prefix="$" />
                   </TableCell>
                   <TableCell align="left">
-                    <NumberFormat value={row.protein} displayType="text" thousandSeparator prefix="$" />
+                    <Status status={row.status} />
                   </TableCell>
+                  <TableCell align="left">{dayjs(row.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell align="right">
                     <IconButton>
                       <EditOutlined />
