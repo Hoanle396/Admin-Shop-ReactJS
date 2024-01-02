@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 
 // third-party
 import ReactApexChart from 'react-apexcharts';
+import dayjs from 'dayjs';
 
 // chart options
 const barChartOptions = {
@@ -25,7 +26,15 @@ const barChartOptions = {
     enabled: false
   },
   xaxis: {
-    categories: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+    categories: [
+      dayjs().add(-7, 'days').format('DD/MM'),
+      dayjs().add(-6, 'days').format('DD/MM'),
+      dayjs().add(-5, 'days').format('DD/MM'),
+      dayjs().add(-4, 'days').format('DD/MM'),
+      dayjs().add(-3, 'days').format('DD/MM'),
+      dayjs().add(-2, 'days').format('DD/MM'),
+      dayjs().add(-1, 'days').format('DD/MM')
+    ],
     axisBorder: {
       show: false
     },
