@@ -6,6 +6,8 @@ import { useTheme } from '@mui/material/styles';
 // third-party
 import ReactApexChart from 'react-apexcharts';
 import dayjs from 'dayjs';
+import { useWeeklyReport } from 'apis/dashboard';
+import { defaultValue } from 'constants';
 
 // chart options
 const areaChartOptions = {
@@ -35,23 +37,15 @@ const IncomeAreaChart = () => {
 
   const { primary, secondary } = theme.palette.text;
   const line = theme.palette.divider;
-
+  const { data = defaultValue } = useWeeklyReport();
   const [options, setOptions] = useState(areaChartOptions);
-
+  console.log(data);
   useEffect(() => {
     setOptions((prevState) => ({
       ...prevState,
       colors: [theme.palette.primary.main, theme.palette.primary[700]],
       xaxis: {
-        categories: [
-          dayjs().add(-7, 'days').format('DD/MM'),
-          dayjs().add(-6, 'days').format('DD/MM'),
-          dayjs().add(-5, 'days').format('DD/MM'),
-          dayjs().add(-4, 'days').format('DD/MM'),
-          dayjs().add(-3, 'days').format('DD/MM'),
-          dayjs().add(-2, 'days').format('DD/MM'),
-          dayjs().add(-1, 'days').format('DD/MM')
-        ],
+        categories: [...data.sales.map(({ date }) => dayjs(date).format('DD/MM'))],
         labels: {
           style: {
             colors: [secondary, secondary, secondary, secondary, secondary, secondary, secondary]
@@ -77,24 +71,25 @@ const IncomeAreaChart = () => {
         theme: 'light'
       }
     }));
-  }, [primary, secondary, line, theme]);
+  }, [primary, secondary, line, theme, data.sales]);
 
-  const [series, setSeries] = useState([]);
-
-  useEffect(() => {
-    setSeries([
-      {
-        name: 'Orders',
-        data: [0, 86, 28, 115, 48, 210, 136]
-      },
-      {
-        name: 'Sales',
-        data: [0, 43, 14, 56, 24, 105, 68]
-      }
-    ]);
-  }, []);
-
-  return <ReactApexChart options={options} series={series} type="area" height={450} />;
+  return (
+    <ReactApexChart
+      options={options}
+      series={[
+        {
+          name: 'Orders',
+          data: data.orders.map(({ value }) => value)
+        },
+        {
+          name: 'Sales',
+          data: data.sales.map(({ value }) => value)
+        }
+      ]}
+      type="area"
+      height={450}
+    />
+  );
 };
 
 export default IncomeAreaChart;

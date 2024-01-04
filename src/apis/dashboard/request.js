@@ -7,3 +7,11 @@ export const getStatistical = async () => {
   });
   return data;
 };
+
+export const getWeeklyReport = async () => {
+  const { data } = await request({
+    url: '/dashboard/weekly-report',
+    method: 'GET'
+  });
+  return data;
+};

@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 
 // third-party
-import ReactApexChart from 'react-apexcharts';
+import { useWeeklyReport } from 'apis/dashboard';
+import { defaultValue } from 'constants';
 import dayjs from 'dayjs';
+import ReactApexChart from 'react-apexcharts';
 
 // chart options
 const barChartOptions = {
@@ -26,15 +28,6 @@ const barChartOptions = {
     enabled: false
   },
   xaxis: {
-    categories: [
-      dayjs().add(-7, 'days').format('DD/MM'),
-      dayjs().add(-6, 'days').format('DD/MM'),
-      dayjs().add(-5, 'days').format('DD/MM'),
-      dayjs().add(-4, 'days').format('DD/MM'),
-      dayjs().add(-3, 'days').format('DD/MM'),
-      dayjs().add(-2, 'days').format('DD/MM'),
-      dayjs().add(-1, 'days').format('DD/MM')
-    ],
     axisBorder: {
       show: false
     },
@@ -54,15 +47,10 @@ const barChartOptions = {
 
 const MonthlyBarChart = () => {
   const theme = useTheme();
+  const { data = defaultValue } = useWeeklyReport();
 
   const { primary, secondary } = theme.palette.text;
   const info = theme.palette.info.light;
-
-  const [series] = useState([
-    {
-      data: [80, 95, 70, 42, 65, 55, 78]
-    }
-  ]);
 
   const [options, setOptions] = useState(barChartOptions);
 
@@ -75,7 +63,8 @@ const MonthlyBarChart = () => {
           style: {
             colors: [secondary, secondary, secondary, secondary, secondary, secondary, secondary]
           }
-        }
+        },
+        categories: [...data.sales.map(({ date }) => dayjs(date).format('DD/MM'))]
       },
       tooltip: {
         theme: 'light'
@@ -86,7 +75,16 @@ const MonthlyBarChart = () => {
 
   return (
     <div id="chart">
-      <ReactApexChart options={options} series={series} type="bar" height={365} />
+      <ReactApexChart
+        options={options}
+        series={[
+          {
+            data: data.sales.map(({ value }) => value)
+          }
+        ]}
+        type="bar"
+        height={365}
+      />
     </div>
   );
 };

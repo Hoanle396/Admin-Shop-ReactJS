@@ -159,7 +159,6 @@ const DashboardDefault = () => {
               <Typography variant="h6" color="textSecondary">
                 This Week Statistics
               </Typography>
-              <Typography variant="h3">$7,650</Typography>
             </Stack>
           </Box>
           <MonthlyBarChart />
