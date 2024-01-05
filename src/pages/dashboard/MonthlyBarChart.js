@@ -79,6 +79,7 @@ const MonthlyBarChart = () => {
         options={options}
         series={[
           {
+            name: '$',
             data: data.sales.map(({ value }) => value)
           }
         ]}

@@ -39,7 +39,7 @@ const IncomeAreaChart = () => {
   const line = theme.palette.divider;
   const { data = defaultValue } = useWeeklyReport();
   const [options, setOptions] = useState(areaChartOptions);
-  console.log(data);
+
   useEffect(() => {
     setOptions((prevState) => ({
       ...prevState,

@@ -1,5 +1,5 @@
-import { EditOutlined } from '@ant-design/icons';
-import { Box, IconButton, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { CheckOutlined, CloseOutlined, EyeOutlined } from '@ant-design/icons';
+import { Box, Button, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -8,8 +8,11 @@ import NumberFormat from 'react-number-format';
 import Dot from 'components/@extended/Dot';
 import { useState } from 'react';
 
-import { useOrders } from 'apis/orders';
+import { updateOrderStatus, useOrders } from 'apis/orders';
+import { ORDER_STATUS } from 'constants';
 import dayjs from 'dayjs';
+import { useMutation } from 'react-query';
+import toast from 'react-hot-toast';
 
 const headCells = [
   {
@@ -69,19 +72,19 @@ const Status = ({ status }) => {
   let title;
 
   switch (status) {
-    case 0:
+    case ORDER_STATUS.PENDING:
       color = 'warning';
       title = 'Pending';
       break;
-    case 2:
+    case ORDER_STATUS.SUCCESS:
       color = 'success';
       title = 'Success';
       break;
-    case 1:
+    case ORDER_STATUS.CLOSED:
       color = 'error';
       title = 'Closed';
       break;
-    case 3:
+    case ORDER_STATUS.CONFIRM:
       color = 'primary';
       title = 'Confirm';
       break;
@@ -107,7 +110,7 @@ Status.propTypes = {
 export default function Orders() {
   const [rows, setRows] = useState();
 
-  useOrders({
+  const { refetch } = useOrders({
     onSuccess: (data) => {
       setRows(data);
     },
@@ -115,6 +118,20 @@ export default function Orders() {
       setRows([]);
     }
   });
+
+  const { mutate } = useMutation(updateOrderStatus, {
+    onSuccess: () => {
+      toast.success('Order updated successfully!');
+      refetch();
+    },
+    onError: () => {
+      toast.error('Order updated failed!');
+    }
+  });
+
+  const handleUpdate = (row, status) => {
+    mutate({ id: row.id, status: status });
+  };
 
   return (
     <Box>
@@ -145,7 +162,7 @@ export default function Orders() {
               return (
                 <TableRow hover role="checkbox" sx={{ '&:last-child td, &:last-child th': { border: 0 } }} tabIndex={-1} key={row.id}>
                   <TableCell component="th" scope="row" align="left">
-                    <Link color="secondary" component={RouterLink} to="">
+                    <Link color="secondary" component={RouterLink} to={`/orders/${row.id}`}>
                       {row.id}
                     </Link>
                   </TableCell>
@@ -158,9 +175,43 @@ export default function Orders() {
                   </TableCell>
                   <TableCell align="left">{dayjs(row.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell align="right">
-                    <IconButton>
-                      <EditOutlined />
-                    </IconButton>
+                    <Stack direction="row" justifyContent="flex-end" gap={2}>
+                      {row.status === ORDER_STATUS.PENDING && (
+                        <>
+                          <Button
+                            startIcon={<CheckOutlined />}
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleUpdate(row, ORDER_STATUS.CONFIRM)}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            startIcon={<CloseOutlined />}
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleUpdate(row, ORDER_STATUS.CLOSED)}
+                          >
+                            Close
+                          </Button>
+                        </>
+                      )}
+                      {row.status === ORDER_STATUS.CONFIRM && (
+                        <Button
+                          startIcon={<CheckOutlined />}
+                          variant="contained"
+                          color="success"
+                          onClick={() => handleUpdate(row, ORDER_STATUS.SUCCESS)}
+                        >
+                          Done
+                        </Button>
+                      )}
+                      <Link component={RouterLink} to={`/orders/${row.id}`}>
+                        <Button startIcon={<EyeOutlined />} variant="outlined">
+                          View
+                        </Button>
+                      </Link>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               );
