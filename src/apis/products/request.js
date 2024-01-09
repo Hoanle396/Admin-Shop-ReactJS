@@ -12,10 +12,11 @@ export const createProduct = async (payload) => {
   return data;
 };
 
-export const getProduct = async () => {
+export const getProduct = async (params) => {
   const { data } = await request({
     url: '/product',
-    method: 'GET'
+    method: 'GET',
+    params
   });
   return data;
 };

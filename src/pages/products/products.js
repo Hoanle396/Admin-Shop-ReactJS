@@ -1,5 +1,18 @@
 import { DeleteOutlined } from '@ant-design/icons';
-import { Avatar, Box, IconButton, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Link,
+  Pagination,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 import NumberFormat from 'react-number-format';
@@ -80,16 +93,23 @@ function HeaderTable() {
 
 export default function Products() {
   const refModalDelete = useRef(null);
+  const [pages, setPages] = useState(1);
   const [rows, setRows] = useState([]);
 
-  const { refetch } = useProduct({
-    onSuccess: (data) => {
-      setRows(data);
+  const { refetch } = useProduct(
+    {
+      onSuccess: (data) => {
+        setRows(data);
+      },
+      onError: () => {
+        setRows([]);
+      }
     },
-    onError: () => {
-      setRows([]);
+    {
+      page: pages,
+      limit: 10
     }
-  });
+  );
 
   const { mutate } = useMutation(deleteProduct, {
     onSuccess: () => {
@@ -108,6 +128,8 @@ export default function Products() {
   const handleDelete = (item) => {
     mutate(item.id);
   };
+
+  console.log(pages);
 
   return (
     <Box>
@@ -171,6 +193,9 @@ export default function Products() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Stack width="100%" justifyContent="flex-end" direction="row" p={2}>
+        <Pagination count={rows.length == 10 ? pages + 1 : pages} page={pages} defaultPage={1} onChange={(e, p) => setPages(p)} />
+      </Stack>
       <DeleteCategory ref={refModalDelete} handleDelete={handleDelete} loading={false} />
     </Box>
   );
