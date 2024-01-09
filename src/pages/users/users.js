@@ -1,62 +1,44 @@
-import PropTypes from 'prop-types';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { Box, IconButton, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Box, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton } from '@mui/material';
 
-import NumberFormat from 'react-number-format';
-
-import Dot from 'components/@extended/Dot';
-import DeleteCategory from './delete';
-import { useRef } from 'react';
-
-function createData(trackingNo, name, fat, carbs, protein) {
-  return { trackingNo, name, fat, carbs, protein };
-}
-
-const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239),
-  createData(13286564, 'Computer Accessories', 100, 1, 83348),
-  createData(86739658, 'TV', 99, 0, 410780),
-  createData(13256498, 'Keyboard', 125, 2, 70999),
-  createData(98753263, 'Mouse', 89, 2, 10570),
-  createData(98753275, 'Desktop', 185, 1, 98063),
-  createData(98753291, 'Chair', 100, 0, 14001)
-];
+import { deleteUser, useUsers } from 'apis/users';
+import dayjs from 'dayjs';
+import { useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useMutation } from 'react-query';
+import Delete from './delete';
 
 const headCells = [
   {
-    id: 'trackingNo',
+    id: 'id',
     align: 'left',
     disablePadding: false,
-    label: 'Tracking No.'
+    label: 'No.'
   },
   {
     id: 'name',
     align: 'left',
     disablePadding: true,
-    label: 'Product Name'
+    label: 'User Full Name'
   },
   {
-    id: 'fat',
-    align: 'right',
-    disablePadding: false,
-    label: 'Total Order'
-  },
-  {
-    id: 'carbs',
+    id: 'email',
     align: 'left',
     disablePadding: false,
-
-    label: 'Status'
+    label: 'Email'
   },
   {
-    id: 'protein',
+    id: 'role',
     align: 'left',
     disablePadding: false,
-    label: 'Total Amount'
+    label: 'Role'
+  },
+  {
+    id: 'createdAt',
+    align: 'left',
+    disablePadding: false,
+    label: 'Created At'
   },
   {
     id: 'actions',
@@ -80,50 +62,37 @@ function HeaderTable() {
   );
 }
 
-const Status = ({ status }) => {
-  let color;
-  let title;
-
-  switch (status) {
-    case 0:
-      color = 'warning';
-      title = 'Pending';
-      break;
-    case 1:
-      color = 'success';
-      title = 'Approved';
-      break;
-    case 2:
-      color = 'error';
-      title = 'Rejected';
-      break;
-    default:
-      color = 'primary';
-      title = 'None';
-  }
-
-  return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <Dot color={color} />
-      <Typography>{title}</Typography>
-    </Stack>
-  );
-};
-
-Status.propTypes = {
-  status: PropTypes.number
-};
-
 // ==============================|| ORDER TABLE ||============================== //
 
-export default function Users() {
+export default function CategoriesTable() {
   const refModalDelete = useRef(null);
+  const [rows, setRows] = useState();
+
+  const { refetch } = useUsers({
+    onSuccess: (data) => {
+      setRows(data);
+    },
+    onError: () => {
+      setRows([]);
+    }
+  });
+
+  const { mutate } = useMutation(deleteUser, {
+    onSuccess: () => {
+      toast.success('User deleted successfully');
+      refetch();
+    },
+    onError: () => {
+      toast.error('User deleted failed');
+    }
+  });
+
   const handleRemove = (item) => {
     refModalDelete.current?.onOpen(item);
   };
 
   const handleDelete = (item) => {
-    console.log({ ...item });
+    mutate(item.id);
   };
 
   return (
@@ -151,32 +120,31 @@ export default function Users() {
         >
           <HeaderTable />
           <TableBody>
-            {rows.map((row) => {
+            {rows?.map((row) => {
               return (
-                <TableRow
-                  hover
-                  role="checkbox"
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  tabIndex={-1}
-                  key={row.trackingNo}
-                >
+                <TableRow hover role="checkbox" sx={{ '&:last-child td, &:last-child th': { border: 0 } }} tabIndex={-1} key={row.id}>
                   <TableCell component="th" scope="row" align="left">
-                    <Link color="secondary" component={RouterLink} to="">
-                      {row.trackingNo}
+                    <Link color="secondary" component={RouterLink} to={`/users/${row.id}`}>
+                      {row.id}
                     </Link>
                   </TableCell>
-                  <TableCell align="left">{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
-                  <TableCell align="left">
-                    <Status status={row.carbs} />
-                  </TableCell>
-                  <TableCell align="left">
-                    <NumberFormat value={row.protein} displayType="text" thousandSeparator prefix="$" />
-                  </TableCell>
+                  <TableCell align="left">{row.fullName}</TableCell>
+                  <TableCell align="left">{row.email}</TableCell>
+                  <TableCell align="left">{row.role == 0 ? 'User' : 'Admin'}</TableCell>
+                  <TableCell align="left">{dayjs(row.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell align="right">
-                    <IconButton>
-                      <DeleteOutlined onClick={() => handleRemove(row)} />
-                    </IconButton>
+                    <Stack direction="row" justifyContent="flex-end">
+                      <Link color="secondary" component={RouterLink} to={`/users/${row.id}`}>
+                        <IconButton>
+                          <EditOutlined />
+                        </IconButton>
+                      </Link>
+                      {row.role != 1 && (
+                        <IconButton onClick={() => handleRemove(row)}>
+                          <DeleteOutlined />
+                        </IconButton>
+                      )}
+                    </Stack>
                   </TableCell>
                 </TableRow>
               );
@@ -184,7 +152,7 @@ export default function Users() {
           </TableBody>
         </Table>
       </TableContainer>
-      <DeleteCategory ref={refModalDelete} handleDelete={handleDelete} loading={false} />
+      <Delete ref={refModalDelete} handleDelete={handleDelete} loading={false} />
     </Box>
   );
 }

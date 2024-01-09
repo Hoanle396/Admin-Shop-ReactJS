@@ -3,16 +3,17 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 import CreateCategory from 'pages/categories/create-category';
+import EditCategory from 'pages/categories/edit-category';
 import Categories from 'pages/categories/index';
 import ComponentColor from 'pages/components-overview/Color';
+import CreateDiscounts from 'pages/discounts/create';
+import DiscountsPage from 'pages/discounts/index';
+import OrdersPage from 'pages/orders/index';
+import OrderDetail from 'pages/orders/order-detail';
 import Create from 'pages/products/create';
 import ProductsPage from 'pages/products/index';
-import OrdersPage from 'pages/orders/index';
 import UsersPage from 'pages/users/index';
-import DiscountsPage from 'pages/discounts/index';
-import CreateDiscounts from 'pages/discounts/create';
-import EditCategory from 'pages/categories/edit-category';
-import OrderDetail from 'pages/orders/order-detail';
+import Update from 'pages/users/update';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -93,8 +94,8 @@ const MainRoutes = {
           element: <UsersPage />
         },
         {
-          path: 'new',
-          element: <Create />
+          path: ':id',
+          element: <Update />
         }
       ]
     },
