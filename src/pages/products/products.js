@@ -129,8 +129,6 @@ export default function Products() {
     mutate(item.id);
   };
 
-  console.log(pages);
-
   return (
     <Box>
       <TableContainer

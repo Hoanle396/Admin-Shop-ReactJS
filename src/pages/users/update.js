@@ -20,7 +20,7 @@ const Update = () => {
   const { mutate } = useMutation(updateUser, {
     onSuccess: () => {
       toast.success('User updated successfully');
-      queryClient.invalidateQueries(['/user/{id}'])
+      queryClient.invalidateQueries(['/user/{id}']);
       push('/users');
     },
     onError: () => {
@@ -29,6 +29,7 @@ const Update = () => {
   });
 
   if (isLoading) return <Loader />;
+
   return (
     <Box>
       <MainCard sx={{ mt: 2, p: 4 }} content>
