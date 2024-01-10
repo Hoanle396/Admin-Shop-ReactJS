@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { getCategory, getCategoryById } from './request';
 
-export const useCategory = (option) => {
-  return useQuery(['/category'], () => getCategory(), {
+export const useCategory = (option, params) => {
+  return useQuery(['/category', params], () => getCategory(params), {
     ...option
   });
 };

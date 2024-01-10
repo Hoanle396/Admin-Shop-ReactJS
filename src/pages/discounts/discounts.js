@@ -13,7 +13,8 @@ import {
   TableRow,
   Typography,
   IconButton,
-  Chip
+  Chip,
+  Pagination
 } from '@mui/material';
 
 import NumberFormat from 'react-number-format';
@@ -135,16 +136,23 @@ Status.propTypes = {
 
 export default function Discounts() {
   const refModalDelete = useRef(null);
-  const [rows, setRows] = useState();
+  const [rows, setRows] = useState([]);
+  const [pages, setPages] = useState(1);
 
-  const { refetch } = useDiscount({
-    onSuccess: (data) => {
-      setRows(data);
+  const { refetch } = useDiscount(
+    {
+      onSuccess: (data) => {
+        setRows(data);
+      },
+      onError: () => {
+        setRows([]);
+      }
     },
-    onError: () => {
-      setRows([]);
+    {
+      page: pages,
+      limit: 10
     }
-  });
+  );
 
   const { mutate } = useMutation(deleteDiscount, {
     onSuccess: () => {
@@ -219,6 +227,9 @@ export default function Discounts() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Stack width="100%" justifyContent="flex-end" direction="row" p={2}>
+        <Pagination count={rows.length == 10 ? pages + 1 : pages} page={pages} defaultPage={1} onChange={(e, p) => setPages(p)} />
+      </Stack>
       <DeleteCategory ref={refModalDelete} handleDelete={handleDelete} loading={false} />
     </Box>
   );

@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { getOrderById, getOrders } from './request';
 
-export const useOrders = (option) => {
-  return useQuery(['/orders'], () => getOrders(), {
+export const useOrders = (option, params = {}) => {
+  return useQuery(['/orders', params], () => getOrders(params), {
     ...option
   });
 };

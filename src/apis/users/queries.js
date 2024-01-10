@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { getUserById, getUsers } from './request';
 
-export const useUsers = (option) => {
-  return useQuery(['/user'], () => getUsers(), {
+export const useUsers = (option, params = {}) => {
+  return useQuery(['/user', params], () => getUsers(params), {
     ...option
   });
 };

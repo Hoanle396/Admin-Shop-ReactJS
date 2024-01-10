@@ -1,9 +1,10 @@
 import request from '../axios';
 
-export const getUsers = async () => {
+export const getUsers = async (params) => {
   const { data } = await request({
     url: '/user',
-    method: 'GET'
+    method: 'GET',
+    params
   });
   return data;
 };

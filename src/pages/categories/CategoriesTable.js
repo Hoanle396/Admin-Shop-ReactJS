@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Box, IconButton, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, IconButton, Link, Pagination, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { useCategory } from 'apis/category/queries';
@@ -61,16 +61,23 @@ function HeaderTable() {
 
 export default function CategoriesTable() {
   const refModalDelete = useRef(null);
-  const [rows, setRows] = useState();
+  const [rows, setRows] = useState([]);
+  const [pages, setPages] = useState(1);
 
-  const { refetch } = useCategory({
-    onSuccess: (data) => {
-      setRows(data);
+  const { refetch } = useCategory(
+    {
+      onSuccess: (data) => {
+        setRows(data);
+      },
+      onError: () => {
+        setRows([]);
+      }
     },
-    onError: () => {
-      setRows([]);
+    {
+      page: pages,
+      limit: 10
     }
-  });
+  );
 
   const { mutate } = useMutation(deleteCategory, {
     onSuccess: () => {
@@ -144,6 +151,9 @@ export default function CategoriesTable() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Stack width="100%" justifyContent="flex-end" direction="row" p={2}>
+        <Pagination count={rows.length == 10 ? pages + 1 : pages} page={pages} defaultPage={1} onChange={(e, p) => setPages(p)} />
+      </Stack>
       <DeleteCategory ref={refModalDelete} handleDelete={handleDelete} loading={false} />
     </Box>
   );

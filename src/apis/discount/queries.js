@@ -1,8 +1,8 @@
 import { useQuery } from 'react-query';
 import { getDiscount, getDiscountById } from './request';
 
-export const useDiscount = (option) => {
-  return useQuery(['/discount'], () => getDiscount(), {
+export const useDiscount = (option, params) => {
+  return useQuery(['/discount', params], () => getDiscount(params), {
     ...option
   });
 };

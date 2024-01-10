@@ -9,10 +9,11 @@ export const createDiscount = async (payload) => {
   return data;
 };
 
-export const getDiscount = async () => {
+export const getDiscount = async (params) => {
   const { data } = await request({
     url: '/discount',
-    method: 'GET'
+    method: 'GET',
+    params
   });
   return data;
 };

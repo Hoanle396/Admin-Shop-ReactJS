@@ -9,10 +9,11 @@ export const createCategory = async (payload) => {
   return data;
 };
 
-export const getCategory = async () => {
+export const getCategory = async (params) => {
   const { data } = await request({
     url: '/category',
-    method: 'GET'
+    method: 'GET',
+    params
   });
   return data;
 };

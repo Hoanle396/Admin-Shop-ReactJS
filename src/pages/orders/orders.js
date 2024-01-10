@@ -1,5 +1,18 @@
 import { CheckOutlined, CloseOutlined, EyeOutlined } from '@ant-design/icons';
-import { Box, Button, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Link,
+  Pagination,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 import PropTypes from 'prop-types';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -108,16 +121,23 @@ Status.propTypes = {
 // ==============================|| ORDER TABLE ||============================== //
 
 export default function Orders() {
-  const [rows, setRows] = useState();
+  const [rows, setRows] = useState([]);
+  const [pages, setPages] = useState(1);
 
-  const { refetch } = useOrders({
-    onSuccess: (data) => {
-      setRows(data);
+  const { refetch } = useOrders(
+    {
+      onSuccess: (data) => {
+        setRows(data);
+      },
+      onError: () => {
+        setRows([]);
+      }
     },
-    onError: () => {
-      setRows([]);
+    {
+      page: pages,
+      limit: 10
     }
-  });
+  );
 
   const { mutate } = useMutation(updateOrderStatus, {
     onSuccess: () => {
@@ -219,6 +239,9 @@ export default function Orders() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Stack width="100%" justifyContent="flex-end" direction="row" p={2}>
+        <Pagination count={rows?.length == 10 ? pages + 1 : pages} page={pages} defaultPage={1} onChange={(e, p) => setPages(p)} />
+      </Stack>
     </Box>
   );
 }
