@@ -11,7 +11,9 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tooltip,
+  Typography
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -169,7 +171,7 @@ export default function Products() {
                     </Link>
                   </TableCell>
                   <TableCell align="left">
-                    <Avatar variant="rounded" src={row.images.length > 0 && row.images[0].url}>
+                    <Avatar variant="rounded" sx={{ width: 74, height: 74 }} src={row.images.length > 0 && row.images[0].url}>
                       {row.name}
                     </Avatar>
                   </TableCell>
@@ -178,7 +180,24 @@ export default function Products() {
                   <TableCell align="left">
                     <NumberFormat value={row.price} displayType="text" thousandSeparator prefix="$ " />
                   </TableCell>
-                  <TableCell align="left">{row.description}</TableCell>
+                  <TableCell align="left">
+                    <Stack direction="row" alignItems="center" maxWidth={400}>
+                      <Tooltip title={row.description ?? ''}>
+                        <Typography
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            lineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                          }}
+                        >
+                          {row.description ?? ''}
+                        </Typography>
+                      </Tooltip>
+                    </Stack>
+                  </TableCell>
                   <TableCell align="left">{dayjs(row.createdAt).format('YYYY-MM-DD HH:mm')}</TableCell>
                   <TableCell align="right">
                     <IconButton>
